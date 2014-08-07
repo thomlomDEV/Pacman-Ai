@@ -21,7 +21,7 @@ var NONE        = 4,
     DYING       = 10,
     Pacman      = {};
 
-Pacman.FPS = 30;
+Pacman.FPS = 24;
 
 Pacman.Ghost = function (game, map, colour) {
 
@@ -265,6 +265,16 @@ Pacman.Ghost = function (game, map, colour) {
         };
     };
     
+    function getState () {
+      var ghost = {
+        position: position,
+        direction: direction,
+        eatable: eatable,
+        eaten: eaten,
+        due: due
+      };
+      return ghost;
+    }
     return {
         "eat"         : eat,
         "isVunerable" : isVunerable,
@@ -272,7 +282,8 @@ Pacman.Ghost = function (game, map, colour) {
         "makeEatable" : makeEatable,
         "reset"       : reset,
         "move"        : move,
-        "draw"        : draw
+        "draw"        : draw,
+        "getState"    : getState
     };
 };
 
@@ -513,6 +524,18 @@ Pacman.User = function (game, map) {
     
     initUser();
 
+    function getState () {
+      pac = {
+        position: position,
+        direction: direction,
+        eaten: eaten,
+        due: due,
+        lives: lives,
+        score: score
+      };
+      return pac;
+    }
+
     return {
         "draw"          : draw,
         "drawDead"      : drawDead,
@@ -525,7 +548,8 @@ Pacman.User = function (game, map) {
         "move"          : move,
         "newLevel"      : newLevel,
         "reset"         : reset,
-        "resetPosition" : resetPosition
+        "resetPosition" : resetPosition,
+        "getState"      : getState
     };
 };
 
@@ -1088,9 +1112,56 @@ var PACMAN = (function () {
         
         timer = window.setInterval(mainLoop, 1000 / Pacman.FPS);
     };
+
+    function getUserState () {
+      return user.getState();
+    }
+
+    function getGhosts () {
+      return ghosts.map(function (ghost) {
+        return ghost.getState();
+      });
+    }
     
     return {
-        "init" : init
+        "init" : init,
+        "getUserState": getUserState,
+        "getGhosts": getGhosts,
+        "start": function () {
+          keyDown({
+            keyCode: 78,
+            preventDefault: function () {},
+            stopPropagation: function () {}
+          })
+        },
+        "down": function () {
+          keyDown({
+            keyCode: 40,
+            preventDefault: function () {},
+            stopPropagation: function () {}
+          })
+        },
+        "up": function () {
+          keyDown({
+            keyCode: 38,
+            preventDefault: function () {},
+            stopPropagation: function () {}
+          })
+        },
+        "left": function () {
+          keyDown({
+            keyCode: 37,
+            preventDefault: function () {},
+            stopPropagation: function () {}
+          })
+        }, 
+        "right": function () {
+          keyDown({
+            keyCode: 39,
+            preventDefault: function () {},
+            stopPropagation: function () {}
+          })
+        }
     };
     
 }());

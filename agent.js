@@ -352,6 +352,44 @@ var update;
         { x:150, y:180, go: [{x:140, y:180, dir:'left'}, {x:160, y:180, dir:'right'}] },
         { x:160, y:180, go: [{x:160, y:170, dir:'up'}, {x:150, y:180, dir:'left'}, {x:170, y:180, dir:'right'}] },
         { x:170, y:180, go: [{x:170, y:190, dir:'down'}, {x:160, y:180, dir:'left'}] }
+      ],
+      [ // Row 18
+        { x:10, y:190, go: [{x:10, y:180, dir:'up'}, {x:10, y:200, dir:'down'}] },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        { x:80, y:190, go: [{x:80, y:180, dir:'up'}, {x:80, y:200, dir:'down'}] },
+        null,
+        { x:100, y:190, go: [{x:100, y:180, dir:'up'}, {x:100, y:200, dir:'down'}] },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        { x:170, y:190, go: [{x:170, y:180, dir:'up'}, {x:170, y:200, dir:'down'}] }
+      ],
+      [ // Row 19
+        { x:10, y:200, go: [{x:10, y:190, dir:'up'}, {x:20, y:200, dir:'right'}] },
+        { x:20, y:200, go: [{x:10, y:200, dir:'left'}, {x:30, y:200, dir:'right'}] },
+        { x:30, y:200, go: [{x:20, y:200, dir:'left'}, {x:40, y:200, dir:'right'}] },
+        { x:40, y:200, go: [{x:30, y:200, dir:'left'}, {x:50, y:200, dir:'right'}] },
+        { x:50, y:200, go: [{x:40, y:200, dir:'left'}, {x:60, y:200, dir:'right'}] },
+        { x:60, y:200, go: [{x:50, y:200, dir:'left'}, {x:70, y:200, dir:'right'}] },
+        { x:70, y:200, go: [{x:60, y:200, dir:'left'}, {x:80, y:200, dir:'right'}] },
+        { x:80, y:200, go: [{x:70, y:200, dir:'left'}, {x:80, y:190, dir:'up'}, {x:90, y:200, dir:'right'}] },
+        { x:90, y:200, go: [{x:80, y:200, dir:'left'}, {x:100, y:200, dir:'right'}] },
+        { x:100, y:200, go: [{x:90, y:200, dir:'left'}, {x:100, y:190, dir:'up'}, {x:110, y:200, dir:'right'}] },
+        { x:110, y:200, go: [{x:100, y:200, dir:'left'}, {x:120, y:200, dir:'right'}] },
+        { x:120, y:200, go: [{x:110, y:200, dir:'left'}, {x:130, y:200, dir:'right'}] },
+        { x:130, y:200, go: [{x:120, y:200, dir:'left'}, {x:140, y:200, dir:'right'}] },
+        { x:140, y:200, go: [{x:130, y:200, dir:'left'}, {x:150, y:200, dir:'right'}] },
+        { x:150, y:200, go: [{x:140, y:200, dir:'left'}, {x:160, y:200, dir:'right'}] },
+        { x:160, y:200, go: [{x:150, y:200, dir:'left'}, {x:170, y:200, dir:'right'}] },
+        { x:170, y:200, go: [{x:160, y:200, dir:'left'}, {x:170, y:190, dir:'up'}] }
       ]
     ];
 
@@ -366,7 +404,8 @@ var update;
         ghosts: PACMAN.getGhosts()
       },
       decideNextMove: function (state, options) {
-        // Do stuff.
+        var random = Math.round(Math.random() * (options.length - 1) );
+        AGENT.move(options[random].dir);
       },
       move: function (direction) { // Moves pacman in whatever direction you'd like.
         if (direction === 'up') { PACMAN.up() }
@@ -386,8 +425,7 @@ var update;
                 AGENT.state.lives = userState.lives;
                 AGENT.state.score = userState.score;
                 AGENT.state.ghosts = PACMAN.getGhosts();
-                console.log(AGENT.state);
-                AGENT.decideNextMove();
+                AGENT.decideNextMove(AGENT.state, element.go);
               }
             }
           });

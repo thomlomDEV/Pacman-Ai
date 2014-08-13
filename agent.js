@@ -21,13 +21,8 @@ var update;
       beenTo: [
         "11,8"
       ],
-      state: [
-        null,
-        null,
-        'pellet',
-        'pellet'
-      ],
       snapshots: [
+        [0,0,2,2,'left']
       ],
       move: function (status, options) {
 
@@ -45,24 +40,29 @@ var update;
         var left = [ position[0], (position[1] - 1) ];
         var right = [ position[0], (position[1] + 1) ];
 
-        AGENT.state = [
+        var state = [ // Take note of surroundings.
           whatsOverHere(status, up),
           whatsOverHere(status, down),
           whatsOverHere(status, left),
           whatsOverHere(status, right)
         ];
 
-        // Check against snapshots.
+        //  TODO Check against snapshots.
+        AGENT.snapshots.forEach(function (snapshot) {
+          arraysEqual(snapshot, state);
+        });
 
         // Crunch numbers and make a move.
         var random = Math.round(Math.random() * (options.length - 1) );
         AGENT.direct(options[random].dir);
+        state[4] = options[random].dir; // Take note of which way you decided to go.
         var position = options[random].id.split(',');
         AGENT.status.goingTo = BOARD[position[0]][position[1]];
 
         // How'd that turn out for ya? (use a callback)
 
         // Store a new snapshot.
+        AGENT.snapshots.push(state);
       },
       direct: function (direction) { // Moves pacman in whatever direction you'd like.
         if (direction === 'up') { PACMAN.up() }
@@ -95,22 +95,33 @@ var update;
      * Some Helper Functions:
      */
 
-    // What's over here, tells you what's in a particular box.
+    // Tells you what's in a particular box.
     function whatsOverHere (status, place) {
-      if ( BOARD[place[0]] === undefined || !BOARD[place[0]][place[1]] ) { // First check for walls.
-        return console.log('Ooo, wall.');
+      // Capture place coordinates.
+      if ( BOARD[place[0]] && BOARD[place[0]][place[1]] ) {
+        var x = BOARD[place[0]][place[1]].x;
+        var y = BOARD[place[0]][place[1]].y;
       }
-      var ghostPositions = status.ghosts.map(function (ghost) { // Then check for ghosts.
-        return [ghost.position.x, ghost.position.y];
+      // (1) First check for walls.
+      if ( BOARD[place[0]] === undefined || !BOARD[place[0]][place[1]] ) {
+        return 0; // console.log('Ooo, wall.');
+      }
+      // (2) Then check for ghosts.
+      var ahhGhost = false;
+      status.ghosts.forEach(function (ghost) {
+        if (Math.abs(ghost.position.x - x) <= 10 && Math.abs(ghost.position.y - y) <= 10) {
+          ahhGhost = true;
+        }
       });
-      console.log(ghostPositions, [BOARD[place[0]][place[1]].x, BOARD[place[0]][place[1]].y, ]);
-      if (false) { // Ahhh, ghost!
-        return console.log('Ghost!');
+      if (ahhGhost) { // Ahhh, ghost!
+        return 3; // console.log('Ghost!');
       }
-      if (AGENT.beenTo.indexOf(place.toString()) !== -1) { // Well, if there's no ghosts, then maybe you've been here?
-        return console.log('been here');
-      } else { // Hmmm, ok, must be a pellet.
-        return console.log('must be a pellet');
+      // (3) Well, if there's no ghosts, then maybe you've been here?
+      if (AGENT.beenTo.indexOf(place.toString()) !== -1) {
+        return 1; // console.log('been here');
+      // (4) Hmmm, ok, must be a pellet.
+      } else {
+        return 2; // console.log('must be a pellet');
       }
     }
 

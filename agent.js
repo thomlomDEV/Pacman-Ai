@@ -42,17 +42,20 @@ var update;
         position[0] = parseInt(position[0], 10);
         position[1] = parseInt(position[1], 10);
         var directions = {
-          up: [ (position[0] - 1), position[1] ],
-          down: [ (position[0] + 1), position[1] ],
-          left: [ position[0], (position[1] - 1) ],
-          right: [ position[0], (position[1] + 1) ]
-        }
+          up: [ (position[0] - 1), position[1], 'up' ],
+          down: [ (position[0] + 1), position[1], 'down' ],
+          left: [ position[0], (position[1] - 1), 'left' ],
+          right: [ position[0], (position[1] + 1), 'right' ]
+        };
+
+        var ways = ['up', 'down', 'left', 'right'];
+        ways = shuffle(ways);
 
         var state = [ // Take note of surroundings.
-          whatsOverHere(status, directions.up),
-          whatsOverHere(status, directions.down),
-          whatsOverHere(status, directions.left),
-          whatsOverHere(status, directions.right)
+          whatsOverHere(status, directions[ways[0]]),
+          whatsOverHere(status, directions[ways[1]]),
+          whatsOverHere(status, directions[ways[2]]),
+          whatsOverHere(status, directions[ways[3]])
         ];
 
         // TODO Check against snapshots.
@@ -62,11 +65,15 @@ var update;
 
         // If Ghost, run.
 
-        var direction; // TODO contineu here.
+        var direction; // TODO continue here.
         if (state.indexOf(2) !== -1) {
-          direction = getDirection(state.indexOf(2));
+          direction = ways[state.indexOf(2)];
+        } else if (state.indexOf(1) !== -1) {
+          direction = ways[state.indexOf(1)];
+        } else if (state.indexOf(3) !== -1) {
+          direction = ways[state.indexOf(3)];
         } else {
-          direction = getDirection(state.indexOf(1));
+          console.log('What just happened?');
         }
 
         AGENT.direct(direction);
@@ -145,14 +152,6 @@ var update;
       } else {
         return 2; // console.log('must be a pellet');
       }
-    }
-
-    // Translate state numbers to directions.
-    function getDirection (num) {
-      if (num === 0) { return 'up'; }
-      if (num === 1) { return 'down'; }
-      if (num === 2) { return 'left'; }
-      if (num === 3) { return 'right'; }
     }
 
     // Quick way to check if arrays are equal.

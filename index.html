@@ -20,9 +20,14 @@
         position:absolute;
         visibility:hidden
       }
-      h1 { font-family: BDCartoonShoutRegular; text-align:center; }
+      h1 { font-size: 2.2em; }
+      h1, h4 { font-family: BDCartoonShoutRegular; text-align:center; }
+      h4 { margin-bottom: 2em; }
+      div#pacman canvas { box-shadow: 0 0 10px 3px #aaa; border-radius: 5px; }
+      html { min-height: 100%; box-shadow: inset 0 0 10px 3px #aaa; }
       body { width:342px; margin:0px auto; font-family:sans-serif; }
       a { text-decoration:none; }
+      p { text-align: center; font-family: BDCartoonShoutRegular; font-size: .7em; }
     </style>
 
 </head>
@@ -31,29 +36,27 @@
 
   <div id="shim">shim for font face</div>
 
-  <h1>HTML5 Pacman</h1>
-
-  <a href="http://arandomurl.com/">Writeup</a> |
-  Code on <a href="http://arandomurl.com/">Github</a>
+  <h1>Pacman AI</h1>
 
   <div id="pacman"></div>
   <script src="board.js"></script>
   <script src="agent.js"></script>
   <script src="pacman.js"></script>
   <script src="modernizr-1.5.min.js"></script>
-
   <script>
-
     var el = document.getElementById("pacman");
-
-    if (Modernizr.canvas && Modernizr.localstorage &&
-        Modernizr.audio && (Modernizr.audio.ogg || Modernizr.audio.mp3)) {
+    if (Modernizr.canvas && Modernizr.localstorage && Modernizr.audio && (Modernizr.audio.ogg || Modernizr.audio.mp3)) {
       window.setTimeout(function () { PACMAN.init(el, "./"); }, 0);
     } else {
-      el.innerHTML = "Sorry, needs a decent browser<br /><small>" +
-        "(firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
+      el.innerHTML = "Sorry, needs a decent browser<br /><small>" + "(firefox 3.6+, Chrome 4+, Opera 10+ and Safari 4+)</small>";
     }
   </script>
+
+  <h4>Press 'N' then stand... back.</h4>
+  <p>Game code by: <a href="http://arandomurl.com/2010/07/25/html5-pacman.html">Dale Harvey</a></p>
+  <p>AI by: <a href="https://github.com/wamoyo/pacman-ai">Costa Michailidis</a></p>
+  <p>Thanks for the help!<br><a href="https://github.com/bruslim">Brian</a>, <a href="https://github.com/cowpig">Max</a>, <a href="https://github.com/thomasballinger">Tom</a>, <a href="https://github.com/maryrosecook">Mary</a>, <a href="https://github.com/kbeyer">Kyle</a>, <a href="http://github.com/smparker1201">Sarah</a></p>
+  <p>This game was inspired by the original Pac-Man&#8482; game by: <a href="http://en.wikipedia.org/wiki/Pac-Man">Toru Iwatani</a> </p>
 
 </body>
 </html>

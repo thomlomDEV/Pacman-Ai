@@ -1,15 +1,16 @@
+// This file captures most of the ai functionality
 
-var update;
+var AGENT;
 
 ;(function () {
   "use strict";
   window.addEventListener('load', function (event) {
 
 
-    PACMAN.start(); // Start on your own.
+    // PACMAN.start(); // Start on your own.
 
     // The agent that will play pacman; hopefully well.
-    var AGENT = {
+    AGENT = {
       status: {
         currentPosition: BOARD[11][8],
         goingTo: BOARD[11][7],
@@ -42,56 +43,52 @@ var update;
         position[0] = parseInt(position[0], 10);
         position[1] = parseInt(position[1], 10);
         var directions = {
-          up: [ (position[0] - 1), position[1], 'up' ],
-          down: [ (position[0] + 1), position[1], 'down' ],
-          left: [ position[0], (position[1] - 1), 'left' ],
-          right: [ position[0], (position[1] + 1), 'right' ]
+          up: [ (position[0] - 1), position[1] ],
+          down: [ (position[0] + 1), position[1] ],
+          left: [ position[0], (position[1] - 1) ],
+          right: [ position[0], (position[1] + 1) ]
         };
 
         var ways = ['up', 'down', 'left', 'right'];
-        ways = shuffle(ways);
+        ways = shuffle(ways); // shuffle order of surroundings to ensure a bit of randomness
 
-        var state = [ // Take note of surroundings.
+        var state = [
           whatsOverHere(status, directions[ways[0]]),
           whatsOverHere(status, directions[ways[1]]),
           whatsOverHere(status, directions[ways[2]]),
           whatsOverHere(status, directions[ways[3]])
         ];
 
-        // TODO Check against snapshots.
-        // AGENT.snapshots.forEach(function (snapshot) {
-        //   arraysEqual(snapshot, state);
-        // });
+        // Move toward pills, 80% of the time. (100% might get you stuck in the middle)
+        var board = BOARD.map(function (row) {
+          var array = row.map(function (element) {
+            if (element !== null) {
+              return element.id;
+            }
+          });
+          return array.filter(function (element) {
+            return element !== undefined;
+          })
+        });
+        var diff = AGENT.beenTo.forEach(function (element, index, array) {
+          // TODO continue here.
+        });
 
-        // If Ghost, run.
-
-        var direction; // TODO continue here.
-        if (state.indexOf(2) !== -1) {
-          direction = ways[state.indexOf(2)];
-        } else if (state.indexOf(1) !== -1) {
-          direction = ways[state.indexOf(1)];
-        } else if (state.indexOf(3) !== -1) {
-          direction = ways[state.indexOf(3)];
+        // Decide which way to go based on surroundings and priorities (go toward pills, stay away from ghosts).
+        var direction;
+        if (state.indexOf('pill') !== -1) {
+          direction = ways[state.indexOf('pill')];
+        } else if (state.indexOf('free parking') !== -1) {
+          direction = ways[state.indexOf('free parking')];
+        } else if (state.indexOf('ghost') !== -1) {
+          direction = ways[state.indexOf('ghost')];
         } else {
           console.log('What just happened?');
         }
 
-        AGENT.direct(direction);
-        AGENT.status.goingTo = BOARD[directions[direction][0]][directions[direction][1]];
+        AGENT.direct(direction); // Move.
+        AGENT.status.goingTo = BOARD[directions[direction][0]][directions[direction][1]]; // Take note of where you're headed so the game update function runs properly.
 
-        // If pill, eat it.
-
-        // Else, be random...
-        // var random = Math.round(Math.random() * (options.length - 1) );
-        // AGENT.direct(options[random].dir);
-        // // state[4] = options[random].dir; // Take note of which way you decided to go.
-        // var position = options[random].id.split(',');
-        // AGENT.status.goingTo = BOARD[position[0]][position[1]];
-
-        // How'd that turn out for ya? (use a callback)
-
-        // Store a new snapshot.
-        // AGENT.snapshots.push(state);
       },
       direct: function (direction) { // Moves pacman in whatever direction you'd like.
         if (direction === 'up') { PACMAN.up() }
@@ -118,8 +115,6 @@ var update;
       }
     };
 
-    update = AGENT.update; // Export this for pacman.js to call.
-
     /*
      * Some Helper Functions:
      */
@@ -138,19 +133,20 @@ var update;
       // (2) Then check for ghosts.
       var ahhGhost = false;
       status.ghosts.forEach(function (ghost) {
-        if (Math.abs(ghost.position.x - x) <= 10 && Math.abs(ghost.position.y - y) <= 10) {
-          ahhGhost = true;
+        if ( (Math.abs(ghost.position.x - x) <= 10 && Math.abs(ghost.position.y - y) <= 10) || (Math.abs(ghost.position.y - y) <= 20 && Math.abs(ghost.position.x - x) === 0) || (Math.abs(ghost.position.x - x) <= 20 && Math.abs(ghost.position.y - y) === 0) ) {
+          // console.log(ghost.eatable);
+          ghost.eatable !== null ? ahhGhost = false : ahhGhost = true;
         }
       });
       if (ahhGhost) { // Ahhh, ghost!
-        return 3; // console.log('Ghost!');
+        return 'ghost'; // console.log('Ghost!');
       }
       // (3) Well, if there's no ghosts, then maybe you've been here?
       if (AGENT.beenTo.indexOf(place.toString()) !== -1) {
-        return 1; // console.log('been here');
+        return 'free parking'; // console.log('been here');
       // (4) Hmmm, ok, must be a pellet.
       } else {
-        return 2; // console.log('must be a pellet');
+        return 'pill'; // console.log('must be a pellet');
       }
     }
 

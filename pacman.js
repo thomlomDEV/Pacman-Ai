@@ -76,6 +76,15 @@ Pacman.Ghost = function (game, map, colour) {
     };
 
     function reset() {
+        AGENT.beenTo = [ // Reset where the AI thinks the pills are.
+          "11,8",
+          "9,0",
+          "9,1",
+          "9,2",
+          "9,14",
+          "9,15",
+          "9,16"
+        ];
         eaten = null;
         eatable = null;
         position = {"x": 90, "y": 80};
@@ -985,7 +994,7 @@ var PACMAN = (function () {
         }
 
         // Run AGENT.update right before repaint.
-        update(PACMAN.getUserState(), PACMAN.getGhosts());
+        AGENT.update(PACMAN.getUserState(), PACMAN.getGhosts());
 
         map.drawPills(ctx);
 
@@ -1340,3 +1349,4 @@ Object.prototype.clone = function () {
     }
     return newObj;
 };
+

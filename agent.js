@@ -19,7 +19,13 @@ var update;
         score: PACMAN.getUserState().score
       },
       beenTo: [
-        "11,8"
+        "11,8",
+        "9,0",
+        "9,1",
+        "9,2",
+        "9,14",
+        "9,15",
+        "9,16"
       ],
       snapshots: [
         [0,0,2,2,'left']
@@ -35,34 +41,50 @@ var update;
         var position = status.currentPosition.id.split(',');
         position[0] = parseInt(position[0], 10);
         position[1] = parseInt(position[1], 10);
-        var up = [ (position[0] - 1), position[1] ];
-        var down = [ (position[0] + 1), position[1] ];
-        var left = [ position[0], (position[1] - 1) ];
-        var right = [ position[0], (position[1] + 1) ];
+        var directions = {
+          up: [ (position[0] - 1), position[1] ],
+          down: [ (position[0] + 1), position[1] ],
+          left: [ position[0], (position[1] - 1) ],
+          right: [ position[0], (position[1] + 1) ]
+        }
 
         var state = [ // Take note of surroundings.
-          whatsOverHere(status, up),
-          whatsOverHere(status, down),
-          whatsOverHere(status, left),
-          whatsOverHere(status, right)
+          whatsOverHere(status, directions.up),
+          whatsOverHere(status, directions.down),
+          whatsOverHere(status, directions.left),
+          whatsOverHere(status, directions.right)
         ];
 
-        //  TODO Check against snapshots.
-        AGENT.snapshots.forEach(function (snapshot) {
-          arraysEqual(snapshot, state);
-        });
+        // TODO Check against snapshots.
+        // AGENT.snapshots.forEach(function (snapshot) {
+        //   arraysEqual(snapshot, state);
+        // });
 
-        // Crunch numbers and make a move.
-        var random = Math.round(Math.random() * (options.length - 1) );
-        AGENT.direct(options[random].dir);
-        state[4] = options[random].dir; // Take note of which way you decided to go.
-        var position = options[random].id.split(',');
-        AGENT.status.goingTo = BOARD[position[0]][position[1]];
+        // If Ghost, run.
+
+        var direction; // TODO contineu here.
+        if (state.indexOf(2) !== -1) {
+          direction = getDirection(state.indexOf(2));
+        } else {
+          direction = getDirection(state.indexOf(1));
+        }
+
+        AGENT.direct(direction);
+        AGENT.status.goingTo = BOARD[directions[direction][0]][directions[direction][1]];
+
+        // If pill, eat it.
+
+        // Else, be random...
+        // var random = Math.round(Math.random() * (options.length - 1) );
+        // AGENT.direct(options[random].dir);
+        // // state[4] = options[random].dir; // Take note of which way you decided to go.
+        // var position = options[random].id.split(',');
+        // AGENT.status.goingTo = BOARD[position[0]][position[1]];
 
         // How'd that turn out for ya? (use a callback)
 
         // Store a new snapshot.
-        AGENT.snapshots.push(state);
+        // AGENT.snapshots.push(state);
       },
       direct: function (direction) { // Moves pacman in whatever direction you'd like.
         if (direction === 'up') { PACMAN.up() }
@@ -125,6 +147,14 @@ var update;
       }
     }
 
+    // Translate state numbers to directions.
+    function getDirection (num) {
+      if (num === 0) { return 'up'; }
+      if (num === 1) { return 'down'; }
+      if (num === 2) { return 'left'; }
+      if (num === 3) { return 'right'; }
+    }
+
     // Quick way to check if arrays are equal.
     function arraysEqual (arr1, arr2) {
       if(arr1.length !== arr2.length) { return false; }
@@ -132,6 +162,25 @@ var update;
         if(arr1[i] !== arr2[i]) { return false; }
       }
       return true;
+    }
+
+    // Suffle arrray
+    function shuffle(array) {
+      var currentIndex = array.length;
+      var temporaryValue;
+      var randomIndex;
+      // While there remain elements to shuffle...
+      while (0 !== currentIndex) {
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+      return array;
     }
 
     // Just hit spacebar to log some info.

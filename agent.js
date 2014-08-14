@@ -19,6 +19,7 @@ var AGENT;
         lives: PACMAN.getUserState().lives,
         score: PACMAN.getUserState().score
       },
+      justWent: 'left',
       beenTo: [
         "11,8",
         "9,0",
@@ -59,27 +60,75 @@ var AGENT;
           whatsOverHere(status, directions[ways[3]])
         ];
 
-        // Move toward pills, 80% of the time. (100% might get you stuck in the middle)
-        var board = BOARD.map(function (row) {
-          var array = row.map(function (element) {
-            if (element !== null) {
-              return element.id;
+        // If there's no immediate pill, or ghost, move toward nearest pill.
+        if (state.indexOf('ghost') === -1 && state.indexOf('pill') === -1) {
+
+          var goes = [];
+          state.forEach(function (dir, index, array) {
+            if (dir !== 0) {
+              var way = index;
+              goes.push([BOARD[directions[ways[way]][0]][directions[ways[way]][1]].x, BOARD[directions[ways[way]][0]][directions[ways[way]][1]].y, ways[way]]);
             }
           });
-          return array.filter(function (element) {
-            return element !== undefined;
-          })
-        });
-        var diff = AGENT.beenTo.forEach(function (element, index, array) {
-          // TODO continue here.
-        });
+
+          // Do some crazy math to find the nearest pill.
+          var board = BOARD.map(function (row) {
+            var array = row.map(function (element) {
+              if (element !== null) {
+                return element.id; // (1) Grab id's of all board spot pacman can go to.
+              }
+            });
+            return array.filter(function (element) {
+              return element !== undefined;
+            })
+          });
+
+          var notBeenTo = []; // (2) Check those id's against all of pacman's beenTo id's.
+          var match = false;
+          board.forEach(function (row, index, array) {
+            row.forEach(function (spot, index, array) {
+              if (AGENT.beenTo.indexOf(spot) === -1) {
+                var split = spot.split(',');
+                notBeenTo.push([BOARD[split[0]][split[1]].x, BOARD[split[0]][split[1]].y]); // (3) Capture the spots he hasn't been to.
+              }
+            });
+          });
+
+          var pac = [status.currentPosition.x, status.currentPosition.y];
+          var nearest = 283;
+          var goForThisOne;
+          notBeenTo.forEach(function (pill, index, pills) { // (4) Calculate the nearest pill he can go for.
+            var distance = calcDistance(pill, pac);
+            if (distance < nearest) {
+              nearest = distance;
+              goForThisOne = pill;
+            }
+          });
+
+          var closest = 283;
+          var goThisWay = 0;
+          goes.forEach(function (here, index, array) {
+            var distance = calcDistance(here, goForThisOne);
+            if (distance < closest) {
+              closest = distance;
+              goThisWay = index;
+            }
+          });
+          var bestChoice = goes[goThisWay][2];
+        }
 
         // Decide which way to go based on surroundings and priorities (go toward pills, stay away from ghosts).
         var direction;
         if (state.indexOf('pill') !== -1) {
           direction = ways[state.indexOf('pill')];
         } else if (state.indexOf('free parking') !== -1) {
-          direction = ways[state.indexOf('free parking')];
+          direction = bestChoice || ways[state.indexOf('free parking')];
+          if (direction === getOpposite(AGENT.justWent)) { // If you just went this way, reconsider : )
+            var index = state.indexOf('free parking');
+            if (state.indexOf('free parking', index + 1) !== -1) { // Choose other direction if possible. If there's a ghost, by all means, turn around.
+              direction = ways[state.indexOf('free parking', index + 1)];
+            }
+          }
         } else if (state.indexOf('ghost') !== -1) {
           direction = ways[state.indexOf('ghost')];
         } else {
@@ -87,6 +136,7 @@ var AGENT;
         }
 
         AGENT.direct(direction); // Move.
+        AGENT.justWent = direction;
         AGENT.status.goingTo = BOARD[directions[direction][0]][directions[direction][1]]; // Take note of where you're headed so the game update function runs properly.
 
       },
@@ -150,15 +200,6 @@ var AGENT;
       }
     }
 
-    // Quick way to check if arrays are equal.
-    function arraysEqual (arr1, arr2) {
-      if(arr1.length !== arr2.length) { return false; }
-      for(var i = arr1.length; i--;) {
-        if(arr1[i] !== arr2[i]) { return false; }
-      }
-      return true;
-    }
-
     // Suffle arrray
     function shuffle(array) {
       var currentIndex = array.length;
@@ -176,6 +217,24 @@ var AGENT;
         array[randomIndex] = temporaryValue;
       }
       return array;
+    }
+
+    // Get the opposite direction.
+    function getOpposite (direction) {
+      if (direction === 'up') return 'down';
+      if (direction === 'down') return 'up';
+      if (direction === 'left') return 'right';
+      if (direction === 'right') return 'left';
+    }
+
+    // Calculate distance from one X,Y coord to another.
+    function calcDistance (pair1, pair2) {
+      var a = Math.abs(pair1[0] - pair2[0]);
+      var b = Math.abs(pair1[1] - pair2[1]);
+      var aSquared = a * a;
+      var bSquared = b * b;
+      var cSquared = a + b;
+      return Math.sqrt(cSquared);
     }
 
     // Just hit spacebar to log some info.

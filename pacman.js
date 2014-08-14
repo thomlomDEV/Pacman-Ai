@@ -76,15 +76,6 @@ Pacman.Ghost = function (game, map, colour) {
     };
 
     function reset() {
-        AGENT.beenTo = [ // Reset where the AI thinks the pills are.
-          "11,8",
-          "9,0",
-          "9,1",
-          "9,2",
-          "9,14",
-          "9,15",
-          "9,16"
-        ];
         eaten = null;
         eatable = null;
         position = {"x": 90, "y": 80};
@@ -337,6 +328,26 @@ Pacman.User = function (game, map) {
     }
 
     function newLevel() {
+        setTimeout(function() {
+          AGENT.status = {
+            currentPosition: BOARD[11][8],
+            goingTo: BOARD[11][7],
+            // eaten: PACMAN.getUserState().eaten,
+            ghosts: PACMAN.getGhosts(),
+            lives: PACMAN.getUserState().lives,
+            score: PACMAN.getUserState().score
+          };
+          AGENT.curre
+          AGENT.beenTo = [ // Reset where the AI thinks the pills are.
+            "11,8",
+            "9,0",
+            "9,1",
+            "9,2",
+            "9,14",
+            "9,15",
+            "9,16"
+          ];
+        }, 2000);
         resetPosition();
         eaten = 0;
     };
